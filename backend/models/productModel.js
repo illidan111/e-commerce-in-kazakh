@@ -5,6 +5,12 @@ const reviewSchema = mongoose.Schema(
     name: { type: String, required: true },
     rating: { type: Number, required: true },
     comment: { type: String, required: true },
+    images: [{ type: String }],
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'spam'],
+      default: 'pending',
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
@@ -38,6 +44,7 @@ const productSchema = mongoose.Schema(
     category: {
       type: String,
       required: true,
+      enum: ['Phones', 'Electronics', 'Clothing', 'Accessories'],
     },
     description: {
       type: String,

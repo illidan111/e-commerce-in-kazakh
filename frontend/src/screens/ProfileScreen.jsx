@@ -25,15 +25,17 @@ const ProfileScreen = () => {
     useProfileMutation();
 
   useEffect(() => {
-    setName(userInfo.name);
-    setEmail(userInfo.email);
-  }, [userInfo.email, userInfo.name]);
+    if (userInfo) {
+      setName(userInfo.name);
+      setEmail(userInfo.email);
+    }
+  }, [userInfo, userInfo?.email, userInfo?.name]);
 
   const dispatch = useDispatch();
   const submitHandler = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error('Құпия сөздер сәйкес келмейді');
     } else {
       try {
         const res = await updateProfile({
@@ -45,7 +47,7 @@ const ProfileScreen = () => {
           password,
         }).unwrap();
         dispatch(setCredentials({ ...res }));
-        toast.success('Profile updated successfully');
+        toast.success('Профиль сәтті жаңартылды');
       } catch (err) {
         toast.error(err?.data?.message || err.error);
       }
@@ -53,114 +55,123 @@ const ProfileScreen = () => {
   };
 
   return (
-    <Row>
-      <Col md={3}>
-        <h2>User Profile</h2>
+    <>
+      <Row className='profile-row'>
+        <Col lg={4} md={5} className='profile-form-col'>
+          <div className='profile-form-card'>
+            <h2 className='section-title mb-4'>Пайдаланушы профилі</h2>
+            <Form onSubmit={submitHandler}>
+              <Form.Group className='mb-3' controlId='name'>
+                <Form.Label className='filter-label'>Аты</Form.Label>
+                <Form.Control
+                  type='text'
+                  placeholder='Атыңызды енгізіңіз'
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className='filter-input'
+                />
+              </Form.Group>
 
-        <Form onSubmit={submitHandler}>
-          <Form.Group className='my-2' controlId='name'>
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              type='text'
-              placeholder='Enter name'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
+              <Form.Group className='mb-3' controlId='email'>
+                <Form.Label className='filter-label'>Электрондық пошта</Form.Label>
+                <Form.Control
+                  type='email'
+                  placeholder='Электрондық поштаңызды енгізіңіз'
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className='filter-input'
+                />
+              </Form.Group>
 
-          <Form.Group className='my-2' controlId='email'>
-            <Form.Label>Email Address</Form.Label>
-            <Form.Control
-              type='email'
-              placeholder='Enter email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
+              <Form.Group className='mb-3' controlId='password'>
+                <Form.Label className='filter-label'>Жаңа құпия сөз</Form.Label>
+                <Form.Control
+                  type='password'
+                  placeholder='Жаңа құпия сөзді енгізіңіз'
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className='filter-input'
+                />
+              </Form.Group>
 
-          <Form.Group className='my-2' controlId='password'>
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type='password'
-              placeholder='Enter password'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
+              <Form.Group className='mb-4' controlId='confirmPassword'>
+                <Form.Label className='filter-label'>Құпия сөзді растаңыз</Form.Label>
+                <Form.Control
+                  type='password'
+                  placeholder='Құпия сөзді қайта енгізіңіз'
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className='filter-input'
+                />
+              </Form.Group>
 
-          <Form.Group className='my-2' controlId='confirmPassword'>
-            <Form.Label>Confirm Password</Form.Label>
-            <Form.Control
-              type='password'
-              placeholder='Confirm password'
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-
-          <Button type='submit' variant='primary'>
-            Update
-          </Button>
-          {loadingUpdateProfile && <Loader />}
-        </Form>
-      </Col>
-      <Col md={9}>
-        <h2>My Orders</h2>
-        {isLoading ? (
-          <Loader />
-        ) : error ? (
-          <Message variant='danger'>
-            {error?.data?.message || error.error}
-          </Message>
-        ) : (
-          <Table striped hover responsive className='table-sm'>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>DATE</th>
-                <th>TOTAL</th>
-                <th>PAID</th>
-                <th>DELIVERED</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                <tr key={order._id}>
-                  <td>{order._id}</td>
-                  <td>{order.createdAt.substring(0, 10)}</td>
-                  <td>{order.totalPrice}</td>
-                  <td>
-                    {order.isPaid ? (
-                      order.paidAt.substring(0, 10)
-                    ) : (
-                      <FaTimes style={{ color: 'red' }} />
-                    )}
-                  </td>
-                  <td>
-                    {order.isDelivered ? (
-                      order.deliveredAt.substring(0, 10)
-                    ) : (
-                      <FaTimes style={{ color: 'red' }} />
-                    )}
-                  </td>
-                  <td>
-                    <Button
-                      as={Link}
-                      to={`/order/${order._id}`}
-                      className='btn-sm'
-                      variant='light'
-                    >
-                      Details
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        )}
-      </Col>
-    </Row>
+              <Button type='submit' variant='primary' className='w-100'>
+                Жаңарту
+              </Button>
+              {loadingUpdateProfile && <Loader />}
+            </Form>
+          </div>
+        </Col>
+        <Col lg={8} md={7} className='profile-orders-col'>
+          <h2 className='section-title mb-4'>Менің тапсырыстарым</h2>
+          {isLoading ? (
+            <Loader />
+          ) : error ? (
+            <Message variant='danger'>
+              {error?.data?.message || error.error}
+            </Message>
+          ) : (
+            <div className='orders-table-wrapper'>
+              <Table striped hover responsive className='table-sm orders-table'>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Күні</th>
+                    <th>Жиыны</th>
+                    <th>Төленген</th>
+                    <th>Жеткізілген</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr key={order._id}>
+                      <td className='order-id'>{order._id}</td>
+                      <td>{order.createdAt.substring(0, 10)}</td>
+                      <td className='order-total'>₸{order.totalPrice.toLocaleString()}</td>
+                      <td>
+                        {order.isPaid ? (
+                          <span className='status-paid'>{order.paidAt.substring(0, 10)}</span>
+                        ) : (
+                          <FaTimes style={{ color: '#ff3b30' }} />
+                        )}
+                      </td>
+                      <td>
+                        {order.isDelivered ? (
+                          <span className='status-delivered'>{order.deliveredAt.substring(0, 10)}</span>
+                        ) : (
+                          <FaTimes style={{ color: '#ff3b30' }} />
+                        )}
+                      </td>
+                      <td>
+                        <Button
+                          as={Link}
+                          to={`/order/${order._id}`}
+                          className='btn-sm btn-details'
+                          variant='light'
+                        >
+                          Толығырақ
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          )}
+        </Col>
+      </Row>
+    </>
   );
 };
 

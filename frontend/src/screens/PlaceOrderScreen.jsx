@@ -13,6 +13,7 @@ const PlaceOrderScreen = () => {
   const navigate = useNavigate();
 
   const cart = useSelector((state) => state.cart);
+  const { userInfo } = useSelector((state) => state.auth);
 
   const [createOrder, { isLoading, error }] = useCreateOrderMutation();
 
@@ -26,6 +27,16 @@ const PlaceOrderScreen = () => {
 
   const dispatch = useDispatch();
   const placeOrderHandler = async () => {
+    if (!userInfo) {
+      toast.error('Пайдаланушы жүйеге кірмеген');
+      return;
+    }
+    
+    if (!cart || !cart.cartItems || cart.cartItems.length === 0) {
+      toast.error('Себетіңіз бос');
+      return;
+    }
+    
     try {
       const res = await createOrder({
         orderItems: cart.cartItems,
@@ -36,10 +47,15 @@ const PlaceOrderScreen = () => {
         taxPrice: cart.taxPrice,
         totalPrice: cart.totalPrice,
       }).unwrap();
+      
+      if (!res || !res._id) {
+        throw new Error('Тапсырыс жасау сәтсіз аяқталды');
+      }
+
       dispatch(clearCartItems());
       navigate(`/order/${res._id}`);
     } catch (err) {
-      toast.error(err);
+      toast.error(err?.data?.message || err.message || err);
     }
   };
 
@@ -50,9 +66,9 @@ const PlaceOrderScreen = () => {
         <Col md={8}>
           <ListGroup variant='flush'>
             <ListGroup.Item>
-              <h2>Shipping</h2>
+              <h2>Жеткізу</h2>
               <p>
-                <strong>Address:</strong>
+                <strong>Мекенжай:</strong>
                 {cart.shippingAddress.address}, {cart.shippingAddress.city}{' '}
                 {cart.shippingAddress.postalCode},{' '}
                 {cart.shippingAddress.country}
@@ -60,15 +76,15 @@ const PlaceOrderScreen = () => {
             </ListGroup.Item>
 
             <ListGroup.Item>
-              <h2>Payment Method</h2>
-              <strong>Method: </strong>
+              <h2>Төлем әдісі</h2>
+              <strong>Әдіс: </strong>
               {cart.paymentMethod}
             </ListGroup.Item>
 
             <ListGroup.Item>
-              <h2>Order Items</h2>
+              <h2>Тапсырыс тауарлары</h2>
               {cart.cartItems.length === 0 ? (
-                <Message>Your cart is empty</Message>
+                <Message>Себетіңіз бос</Message>
               ) : (
                 <ListGroup variant='flush'>
                   {cart.cartItems.map((item, index) => (
@@ -88,7 +104,7 @@ const PlaceOrderScreen = () => {
                           </Link>
                         </Col>
                         <Col md={4}>
-                          {item.qty} x ${item.price} = $
+                          {item.qty} x ₸{item.price} = ₸
                           {(item.qty * (item.price * 100)) / 100}
                         </Col>
                       </Row>
@@ -103,30 +119,30 @@ const PlaceOrderScreen = () => {
           <Card>
             <ListGroup variant='flush'>
               <ListGroup.Item>
-                <h2>Order Summary</h2>
+                <h2>Тапсырыс қорытындысы</h2>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Items</Col>
-                  <Col>${cart.itemsPrice}</Col>
+                  <Col>Тауарлар</Col>
+                  <Col>₸{cart.itemsPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Shipping</Col>
-                  <Col>${cart.shippingPrice}</Col>
+                  <Col>Жеткізу</Col>
+                  <Col>₸{cart.shippingPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Tax</Col>
-                  <Col>${cart.taxPrice}</Col>
+                  <Col>Салық</Col>
+                  <Col>₸{cart.taxPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Total</Col>
-                  <Col>${cart.totalPrice}</Col>
+                  <Col>Жиыны</Col>
+                  <Col>₸{cart.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -141,7 +157,7 @@ const PlaceOrderScreen = () => {
                   disabled={cart.cartItems === 0}
                   onClick={placeOrderHandler}
                 >
-                  Place Order
+                  Тапсырыс беру
                 </Button>
                 {isLoading && <Loader />}
               </ListGroup.Item>

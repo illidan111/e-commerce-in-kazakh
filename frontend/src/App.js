@@ -4,6 +4,7 @@ import { Container } from 'react-bootstrap';
 import { Outlet } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ChatWidget from './components/ChatWidget';
 import { logout } from './slices/authSlice';
 
 import { ToastContainer } from 'react-toastify';
@@ -33,6 +34,7 @@ const App = () => {
         </Container>
       </main>
       <Footer />
+      <ChatWidget />
     </>
   );
 };

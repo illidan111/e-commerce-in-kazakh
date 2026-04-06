@@ -50,7 +50,7 @@ const ProductEditScreen = () => {
         description,
         countInStock,
       }).unwrap(); // NOTE: here we need to unwrap the Promise to catch any rejection in our catch block
-      toast.success('Product updated');
+      toast.success('Өнім жаңартылды');
       refetch();
       navigate('/admin/productlist');
     } catch (err) {
@@ -85,10 +85,10 @@ const ProductEditScreen = () => {
   return (
     <>
       <Link to='/admin/productlist' className='btn btn-light my-3'>
-        Go Back
+        Артқа
       </Link>
       <FormContainer>
-        <h1>Edit Product</h1>
+        <h1>Өнімді өңдеу</h1>
         {loadingUpdate && <Loader />}
         {isLoading ? (
           <Loader />
@@ -97,35 +97,35 @@ const ProductEditScreen = () => {
         ) : (
           <Form onSubmit={submitHandler}>
             <Form.Group controlId='name'>
-              <Form.Label>Name</Form.Label>
+              <Form.Label>Аты</Form.Label>
               <Form.Control
                 type='name'
-                placeholder='Enter name'
+                placeholder='Атын енгізіңіз'
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               ></Form.Control>
             </Form.Group>
 
             <Form.Group controlId='price'>
-              <Form.Label>Price</Form.Label>
+              <Form.Label>Бағасы</Form.Label>
               <Form.Control
                 type='number'
-                placeholder='Enter price'
+                placeholder='Бағаны енгізіңіз'
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
               ></Form.Control>
             </Form.Group>
 
             <Form.Group controlId='image'>
-              <Form.Label>Image</Form.Label>
+              <Form.Label>Сурет</Form.Label>
               <Form.Control
                 type='text'
-                placeholder='Enter image url'
+                placeholder='Сурет URL енгізіңіз'
                 value={image}
                 onChange={(e) => setImage(e.target.value)}
               ></Form.Control>
               <Form.Control
-                label='Choose File'
+                label='Файлды таңдаңыз'
                 onChange={uploadFileHandler}
                 type='file'
               ></Form.Control>
@@ -133,40 +133,40 @@ const ProductEditScreen = () => {
             </Form.Group>
 
             <Form.Group controlId='brand'>
-              <Form.Label>Brand</Form.Label>
+              <Form.Label>Бренд</Form.Label>
               <Form.Control
                 type='text'
-                placeholder='Enter brand'
+                placeholder='Брендті енгізіңіз'
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
               ></Form.Control>
             </Form.Group>
 
             <Form.Group controlId='countInStock'>
-              <Form.Label>Count In Stock</Form.Label>
+              <Form.Label>Қоймадағы саны</Form.Label>
               <Form.Control
                 type='number'
-                placeholder='Enter countInStock'
+                placeholder='Қоймадағы санын енгізіңіз'
                 value={countInStock}
                 onChange={(e) => setCountInStock(e.target.value)}
               ></Form.Control>
             </Form.Group>
 
             <Form.Group controlId='category'>
-              <Form.Label>Category</Form.Label>
+              <Form.Label>Санаты</Form.Label>
               <Form.Control
                 type='text'
-                placeholder='Enter category'
+                placeholder='Санатын енгізіңіз'
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               ></Form.Control>
             </Form.Group>
 
             <Form.Group controlId='description'>
-              <Form.Label>Description</Form.Label>
+              <Form.Label>Сипаттама</Form.Label>
               <Form.Control
                 type='text'
-                placeholder='Enter description'
+                placeholder='Сипаттаманы енгізіңіз'
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               ></Form.Control>
@@ -177,7 +177,7 @@ const ProductEditScreen = () => {
               variant='primary'
               style={{ marginTop: '1rem' }}
             >
-              Update
+              Жаңарту
             </Button>
           </Form>
         )}

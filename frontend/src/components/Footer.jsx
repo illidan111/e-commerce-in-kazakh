@@ -4,11 +4,11 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer>
+    <footer className='custom-footer'>
       <Container>
         <Row>
           <Col className='text-center py-3'>
-            <p>ProShop &copy; {currentYear}</p>
+            <p>Copyright © {currentYear} JustShop Inc. Барлық құқықтар қорғалған.</p>
           </Col>
         </Row>
       </Container>

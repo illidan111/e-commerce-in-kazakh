@@ -1,5 +1,5 @@
 import { Navbar, Nav, Container, NavDropdown, Badge } from 'react-bootstrap';
-import { FaShoppingCart, FaUser } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaHeart } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLogoutMutation } from '../slices/usersApiSlice';
@@ -11,6 +11,7 @@ import { resetCart } from '../slices/cartSlice';
 const Header = () => {
   const { cartItems } = useSelector((state) => state.cart);
   const { userInfo } = useSelector((state) => state.auth);
+  const { favoriteItems } = useSelector((state) => state.favorites);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -32,20 +33,34 @@ const Header = () => {
 
   return (
     <header>
-      <Navbar bg='primary' variant='dark' expand='lg' collapseOnSelect>
-        <Container>
-          <Navbar.Brand as={Link} to='/'>
-            <img src={logo} alt='ProShop' />
-            ProShop
+      <Navbar className='custom-navbar' variant='light' expand='lg' collapseOnSelect>
+        <Container fluid className='header-container'>
+          <Navbar.Brand as={Link} to='/' className='brand-text header-brand'>
+            JustShop
           </Navbar.Brand>
+          <div className='header-search d-none d-lg-block'>
+            <SearchBox />
+          </div>
           <Navbar.Toggle aria-controls='basic-navbar-nav' />
-          <Navbar.Collapse id='basic-navbar-nav'>
-            <Nav className='ms-auto'>
+          <Navbar.Collapse id='basic-navbar-nav' className='header-nav-collapse'>
+            <div className='d-lg-none mb-3 mt-2'>
               <SearchBox />
-              <Nav.Link as={Link} to='/cart'>
-                <FaShoppingCart /> Cart
+            </div>
+            <Nav className='header-nav'>
+              <Nav.Link as={Link} to='/favorites' className='favorites-link'>
+                <FaHeart className='nav-icon' />
+                <span className='nav-text'>Таңдаулылар</span>
+                {favoriteItems.length > 0 && (
+                  <Badge pill bg='danger' className='nav-badge'>
+                    {favoriteItems.length}
+                  </Badge>
+                )}
+              </Nav.Link>
+              <Nav.Link as={Link} to='/cart' className='cart-link'>
+                <FaShoppingCart className='nav-icon' />
+                <span className='nav-text'>Себет</span>
                 {cartItems.length > 0 && (
-                  <Badge pill bg='success' style={{ marginLeft: '5px' }}>
+                  <Badge pill bg='success' className='nav-badge'>
                     {cartItems.reduce((a, c) => a + c.qty, 0)}
                   </Badge>
                 )}
@@ -54,30 +69,36 @@ const Header = () => {
                 <>
                   <NavDropdown title={userInfo.name} id='username'>
                     <NavDropdown.Item as={Link} to='/profile'>
-                      Profile
+                      Профиль
                     </NavDropdown.Item>
                     <NavDropdown.Item onClick={logoutHandler}>
-                      Logout
+                      Шығу
                     </NavDropdown.Item>
                   </NavDropdown>
                 </>
               ) : (
                 <Nav.Link as={Link} to='/login'>
-                  <FaUser /> Sign In
+                  <FaUser /> Кіру
                 </Nav.Link>
               )}
 
               {/* Admin Links */}
               {userInfo && userInfo.isAdmin && (
-                <NavDropdown title='Admin' id='adminmenu'>
+                <NavDropdown title='Әкімші' id='adminmenu' align='end' style={{ position: 'relative', zIndex: 9999 }}>
+                  <NavDropdown.Item as={Link} to='/admin/dashboard'>
+                    Статистика
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to='/admin/reviews'>
+                    Пікірлер
+                  </NavDropdown.Item>
                   <NavDropdown.Item as={Link} to='/admin/productlist'>
-                    Products
+                    Өнімдер
                   </NavDropdown.Item>
                   <NavDropdown.Item as={Link} to='/admin/orderlist'>
-                    Orders
+                    Тапсырыстар
                   </NavDropdown.Item>
                   <NavDropdown.Item as={Link} to='/admin/userlist'>
-                    Users
+                    Пайдаланушылар
                   </NavDropdown.Item>
                 </NavDropdown>
               )}

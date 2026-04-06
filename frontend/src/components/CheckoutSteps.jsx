@@ -8,40 +8,40 @@ const CheckoutSteps = ({ step1, step2, step3, step4 }) => {
       <Nav.Item>
         {step1 ? (
           <Nav.Link as={Link} to='/login'>
-            Sign In
+            Кіру
           </Nav.Link>
         ) : (
-          <Nav.Link disabled>Sign In</Nav.Link>
+          <Nav.Link disabled>Кіру</Nav.Link>
         )}
       </Nav.Item>
 
       <Nav.Item>
         {step2 ? (
           <Nav.Link as={Link} to='/shipping'>
-            Shipping
+            Жеткізу
           </Nav.Link>
         ) : (
-          <Nav.Link disabled>Shipping</Nav.Link>
+          <Nav.Link disabled>Жеткізу</Nav.Link>
         )}
       </Nav.Item>
 
       <Nav.Item>
         {step3 ? (
           <Nav.Link as={Link} to='/payment'>
-            Payment
+            Төлем
           </Nav.Link>
         ) : (
-          <Nav.Link disabled>Payment</Nav.Link>
+          <Nav.Link disabled>Төлем</Nav.Link>
         )}
       </Nav.Item>
 
       <Nav.Item>
         {step4 ? (
           <Nav.Link as={Link} to='/placeorder'>
-            Place Order
+            Тапсырыс беру
           </Nav.Link>
         ) : (
-          <Nav.Link disabled>Place Order</Nav.Link>
+          <Nav.Link disabled>Тапсырыс беру</Nav.Link>
         )}
       </Nav.Item>
     </Nav>

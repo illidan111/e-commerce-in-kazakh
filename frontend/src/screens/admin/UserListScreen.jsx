@@ -16,7 +16,7 @@ const UserListScreen = () => {
   const [deleteUser] = useDeleteUserMutation();
 
   const deleteHandler = async (id) => {
-    if (window.confirm('Are you sure')) {
+    if (window.confirm('Сенімдісіз бе?')) {
       try {
         await deleteUser(id);
         refetch();
@@ -28,7 +28,7 @@ const UserListScreen = () => {
 
   return (
     <>
-      <h1>Users</h1>
+      <h1>Пайдаланушылар</h1>
       {isLoading ? (
         <Loader />
       ) : error ? (
@@ -40,9 +40,9 @@ const UserListScreen = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>NAME</th>
-              <th>EMAIL</th>
-              <th>ADMIN</th>
+              <th>АТЫ</th>
+              <th>ЭЛЕКТРОНДЫҚ ПОШТА</th>
+              <th>ӘКІМШІ</th>
               <th></th>
             </tr>
           </thead>

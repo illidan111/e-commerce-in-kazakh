@@ -30,26 +30,36 @@ const PaymentScreen = () => {
   return (
     <FormContainer>
       <CheckoutSteps step1 step2 step3 />
-      <h1>Payment Method</h1>
+      <h1>Төлем әдісі</h1>
       <Form onSubmit={submitHandler}>
         <Form.Group>
-          <Form.Label as='legend'>Select Method</Form.Label>
+          <Form.Label as='legend'>Әдісті таңдаңыз</Form.Label>
           <Col>
             <Form.Check
               className='my-2'
               type='radio'
-              label='PayPal or Credit Card'
+              label='PayPal немесе несие картасы'
               id='PayPal'
               name='paymentMethod'
               value='PayPal'
-              checked
+              checked={paymentMethod === 'PayPal'}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            ></Form.Check>
+            <Form.Check
+              className='my-2'
+              type='radio'
+              label='Stripe (карта)'
+              id='Stripe'
+              name='paymentMethod'
+              value='Stripe'
+              checked={paymentMethod === 'Stripe'}
               onChange={(e) => setPaymentMethod(e.target.value)}
             ></Form.Check>
           </Col>
         </Form.Group>
 
         <Button type='submit' variant='primary'>
-          Continue
+          Жалғастыру
         </Button>
       </Form>
     </FormContainer>

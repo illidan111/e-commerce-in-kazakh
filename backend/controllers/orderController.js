@@ -10,7 +10,12 @@ import { verifyPayPalPayment, checkIfNewTransaction } from '../utils/paypal.js';
 const addOrderItems = asyncHandler(async (req, res) => {
   const { orderItems, shippingAddress, paymentMethod } = req.body;
 
-  if (orderItems && orderItems.length === 0) {
+  if (!req.user) {
+    res.status(401);
+    throw new Error('Not authorized, user not found');
+  }
+
+  if (!orderItems || orderItems.length === 0) {
     res.status(400);
     throw new Error('No order items');
   } else {
@@ -21,17 +26,24 @@ const addOrderItems = asyncHandler(async (req, res) => {
 
     // get the ordered items from our database
     const itemsFromDB = await Product.find({
-      _id: { $in: orderItems.map((x) => x._id) },
+      _id: { $in: orderItems.map((x) => x._id || x.product) },
     });
 
     // map over the order items and use the price from our items from database
     const dbOrderItems = orderItems.map((itemFromClient) => {
+      const clientId = itemFromClient._id || itemFromClient.product;
       const matchingItemFromDB = itemsFromDB.find(
-        (itemFromDB) => itemFromDB._id.toString() === itemFromClient._id
+        (itemFromDB) => itemFromDB._id.toString() === clientId
       );
+      
+      if (!matchingItemFromDB) {
+        res.status(404);
+        throw new Error(`Product not found in database: ${itemFromClient.name}`);
+      }
+
       return {
         ...itemFromClient,
-        product: itemFromClient._id,
+        product: clientId,
         price: matchingItemFromDB.price,
         _id: undefined,
       };

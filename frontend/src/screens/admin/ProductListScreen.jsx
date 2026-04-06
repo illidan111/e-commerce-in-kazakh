@@ -22,7 +22,7 @@ const ProductListScreen = () => {
     useDeleteProductMutation();
 
   const deleteHandler = async (id) => {
-    if (window.confirm('Are you sure')) {
+    if (window.confirm('Сенімдісіз бе?')) {
       try {
         await deleteProduct(id);
         refetch();
@@ -36,7 +36,7 @@ const ProductListScreen = () => {
     useCreateProductMutation();
 
   const createProductHandler = async () => {
-    if (window.confirm('Are you sure you want to create a new product?')) {
+    if (window.confirm('Жаңа өнім жасағыңыз келе ме?')) {
       try {
         await createProduct();
         refetch();
@@ -50,11 +50,11 @@ const ProductListScreen = () => {
     <>
       <Row className='align-items-center'>
         <Col>
-          <h1>Products</h1>
+          <h1>Өнімдер</h1>
         </Col>
         <Col className='text-end'>
           <Button className='my-3' onClick={createProductHandler}>
-            <FaPlus /> Create Product
+            <FaPlus /> Өнім жасау
           </Button>
         </Col>
       </Row>
@@ -71,10 +71,10 @@ const ProductListScreen = () => {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>NAME</th>
-                <th>PRICE</th>
-                <th>CATEGORY</th>
-                <th>BRAND</th>
+                <th>АТЫ</th>
+                <th>БАҒАСЫ</th>
+                <th>САНАТЫ</th>
+                <th>БРЕНДІ</th>
                 <th></th>
               </tr>
             </thead>

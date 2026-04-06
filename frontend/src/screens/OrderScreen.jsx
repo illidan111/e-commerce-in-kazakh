@@ -1,7 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Row, Col, ListGroup, Image, Card, Button } from 'react-bootstrap';
 import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import Message from '../components/Message';
@@ -11,7 +13,9 @@ import {
   useGetOrderDetailsQuery,
   useGetPaypalClientIdQuery,
   usePayOrderMutation,
+  useGetStripeConfigQuery,
 } from '../slices/ordersApiSlice';
+import StripePayment from '../components/StripePayment';
 
 const OrderScreen = () => {
   const { id: orderId } = useParams();
@@ -38,6 +42,19 @@ const OrderScreen = () => {
     error: errorPayPal,
   } = useGetPaypalClientIdQuery();
 
+  const {
+    data: stripeConfig,
+    isLoading: loadingStripeConfig,
+  } = useGetStripeConfigQuery();
+
+  const [stripePromise, setStripePromise] = useState(null);
+
+  useEffect(() => {
+    if (stripeConfig?.publicKey) {
+      setStripePromise(loadStripe(stripeConfig.publicKey));
+    }
+  }, [stripeConfig]);
+
   useEffect(() => {
     if (!errorPayPal && !loadingPayPal && paypal.clientId) {
       const loadPaypalScript = async () => {
@@ -50,7 +67,7 @@ const OrderScreen = () => {
         });
         paypalDispatch({ type: 'setLoadingStatus', value: 'pending' });
       };
-      if (order && !order.isPaid) {
+      if (order && !order.isPaid && order.paymentMethod === 'PayPal') {
         if (!window.paypal) {
           loadPaypalScript();
         }
@@ -63,7 +80,7 @@ const OrderScreen = () => {
       try {
         await payOrder({ orderId, details });
         refetch();
-        toast.success('Order is paid');
+        toast.success('Тапсырыс төленді');
       } catch (err) {
         toast.error(err?.data?.message || err.error);
       }
@@ -107,51 +124,51 @@ const OrderScreen = () => {
     <Message variant='danger'>{error.data.message}</Message>
   ) : (
     <>
-      <h1>Order {order._id}</h1>
+      <h1>Тапсырыс {order._id}</h1>
       <Row>
         <Col md={8}>
           <ListGroup variant='flush'>
             <ListGroup.Item>
-              <h2>Shipping</h2>
+              <h2>Жеткізу</h2>
               <p>
-                <strong>Name: </strong> {order.user.name}
+                <strong>Аты: </strong> {order.user.name}
               </p>
               <p>
-                <strong>Email: </strong>{' '}
+                <strong>Электрондық пошта: </strong>{' '}
                 <a href={`mailto:${order.user.email}`}>{order.user.email}</a>
               </p>
               <p>
-                <strong>Address:</strong>
+                <strong>Мекенжай:</strong>
                 {order.shippingAddress.address}, {order.shippingAddress.city}{' '}
                 {order.shippingAddress.postalCode},{' '}
                 {order.shippingAddress.country}
               </p>
               {order.isDelivered ? (
                 <Message variant='success'>
-                  Delivered on {order.deliveredAt}
+                  {order.deliveredAt} күні жеткізілді
                 </Message>
               ) : (
-                <Message variant='danger'>Not Delivered</Message>
+                <Message variant='danger'>Жеткізілмеген</Message>
               )}
             </ListGroup.Item>
 
             <ListGroup.Item>
-              <h2>Payment Method</h2>
+              <h2>Төлем әдісі</h2>
               <p>
-                <strong>Method: </strong>
+                <strong>Әдіс: </strong>
                 {order.paymentMethod}
               </p>
               {order.isPaid ? (
-                <Message variant='success'>Paid on {order.paidAt}</Message>
+                <Message variant='success'>{order.paidAt} күні төленді</Message>
               ) : (
-                <Message variant='danger'>Not Paid</Message>
+                <Message variant='danger'>Төленбеген</Message>
               )}
             </ListGroup.Item>
 
             <ListGroup.Item>
-              <h2>Order Items</h2>
+              <h2>Тапсырыс тауарлары</h2>
               {order.orderItems.length === 0 ? (
-                <Message>Order is empty</Message>
+                <Message>Тапсырыс бос</Message>
               ) : (
                 <ListGroup variant='flush'>
                   {order.orderItems.map((item, index) => (
@@ -171,7 +188,7 @@ const OrderScreen = () => {
                           </Link>
                         </Col>
                         <Col md={4}>
-                          {item.qty} x ${item.price} = ${item.qty * item.price}
+                          {item.qty} x ₸{item.price} = ₸{item.qty * item.price}
                         </Col>
                       </Row>
                     </ListGroup.Item>
@@ -185,56 +202,68 @@ const OrderScreen = () => {
           <Card>
             <ListGroup variant='flush'>
               <ListGroup.Item>
-                <h2>Order Summary</h2>
+                <h2>Тапсырыс қорытындысы</h2>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Items</Col>
-                  <Col>${order.itemsPrice}</Col>
+                  <Col>Тауарлар</Col>
+                  <Col>₸{order.itemsPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Shipping</Col>
-                  <Col>${order.shippingPrice}</Col>
+                  <Col>Жеткізу</Col>
+                  <Col>₸{order.shippingPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Tax</Col>
-                  <Col>${order.taxPrice}</Col>
+                  <Col>Салық</Col>
+                  <Col>₸{order.taxPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Total</Col>
-                  <Col>${order.totalPrice}</Col>
+                  <Col>Жиыны</Col>
+                  <Col>₸{order.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
               {!order.isPaid && (
                 <ListGroup.Item>
                   {loadingPay && <Loader />}
 
-                  {isPending ? (
-                    <Loader />
+                  {order.paymentMethod === 'Stripe' ? (
+                    stripePromise ? (
+                      <Elements stripe={stripePromise}>
+                        <StripePayment order={order} refetch={refetch} />
+                      </Elements>
+                    ) : (
+                      <Loader />
+                    )
                   ) : (
-                    <div>
-                      {/* THIS BUTTON IS FOR TESTING! REMOVE BEFORE PRODUCTION! */}
-                      {/* <Button
-                        style={{ marginBottom: '10px' }}
-                        onClick={onApproveTest}
-                      >
-                        Test Pay Order
-                      </Button> */}
+                    <>
+                      {isPending ? (
+                        <Loader />
+                      ) : (
+                        <div>
+                          {/* THIS BUTTON IS FOR TESTING! REMOVE BEFORE PRODUCTION! */}
+                          {/* <Button
+                            style={{ marginBottom: '10px' }}
+                            onClick={onApproveTest}
+                          >
+                            Test Pay Order
+                          </Button> */}
 
-                      <div>
-                        <PayPalButtons
-                          createOrder={createOrder}
-                          onApprove={onApprove}
-                          onError={onError}
-                        ></PayPalButtons>
-                      </div>
-                    </div>
+                          <div>
+                            <PayPalButtons
+                              createOrder={createOrder}
+                              onApprove={onApprove}
+                              onError={onError}
+                            ></PayPalButtons>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </ListGroup.Item>
               )}
@@ -251,7 +280,7 @@ const OrderScreen = () => {
                       className='btn btn-block'
                       onClick={deliverHandler}
                     >
-                      Mark As Delivered
+                      Жеткізілді деп белгілеу
                     </Button>
                   </ListGroup.Item>
                 )}

@@ -10,6 +10,7 @@ import {
   Card,
   Button,
   Form,
+  Modal,
 } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import {
@@ -21,6 +22,11 @@ import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Meta from '../components/Meta';
 import { addToCart } from '../slices/cartSlice';
+import { FaCamera, FaTimes } from 'react-icons/fa';
+import axios from 'axios';
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGES = 3;
 
 const ProductScreen = () => {
   const { id: productId } = useParams();
@@ -31,6 +37,10 @@ const ProductScreen = () => {
   const [qty, setQty] = useState(1);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [reviewImages, setReviewImages] = useState([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   const addToCartHandler = () => {
     dispatch(addToCart({ ...product, qty }));
@@ -49,26 +59,109 @@ const ProductScreen = () => {
   const [createReview, { isLoading: loadingProductReview }] =
     useCreateReviewMutation();
 
+  const handleImageSelect = (e) => {
+    const files = Array.from(e.target.files);
+    
+    if (reviewImages.length + files.length > MAX_IMAGES) {
+      toast.error(`Ең көбі ${MAX_IMAGES} сурет жүктеуге болады`);
+      return;
+    }
+
+    const validFiles = [];
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`"${file.name}" файлы 5МБ-ден асып кетті`);
+        continue;
+      }
+      validFiles.push(file);
+    }
+
+    const newImages = validFiles.map(file => ({
+      file,
+      preview: URL.createObjectURL(file),
+      uploaded: false,
+      url: null,
+    }));
+
+    setReviewImages([...reviewImages, ...newImages]);
+  };
+
+  const removeImage = (index) => {
+    const newImages = [...reviewImages];
+    URL.revokeObjectURL(newImages[index].preview);
+    newImages.splice(index, 1);
+    setReviewImages(newImages);
+  };
+
+  const uploadImages = async () => {
+    if (reviewImages.length === 0) return [];
+
+    setUploadingImages(true);
+    try {
+      const formData = new FormData();
+      reviewImages.forEach((img) => {
+        if (!img.uploaded) {
+          formData.append('images', img.file);
+        }
+      });
+
+      const { data } = await axios.post('/api/upload/reviews', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setUploadingImages(false);
+      return data.images;
+    } catch (err) {
+      setUploadingImages(false);
+      toast.error(err.response?.data?.message || 'Суреттерді жүктеу сәтсіз аяқталды');
+      return null;
+    }
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
 
     try {
+      let imageUrls = [];
+      if (reviewImages.length > 0) {
+        imageUrls = await uploadImages();
+        if (imageUrls === null) return;
+      }
+
       await createReview({
         productId,
         rating,
         comment,
+        images: imageUrls,
       }).unwrap();
+
+      reviewImages.forEach(img => URL.revokeObjectURL(img.preview));
+      setReviewImages([]);
+      setRating(0);
+      setComment('');
       refetch();
-      toast.success('Review created successfully');
+      toast.success('Пікір сәтті жасалды');
     } catch (err) {
       toast.error(err?.data?.message || err.error);
     }
   };
 
+  const openImageModal = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setShowImageModal(true);
+  };
+
+  const closeImageModal = () => {
+    setShowImageModal(false);
+    setSelectedImage(null);
+  };
+
   return (
     <>
       <Link className='btn btn-light my-3' to='/'>
-        Go Back
+        Артқа
       </Link>
       {isLoading ? (
         <Loader />
@@ -81,7 +174,7 @@ const ProductScreen = () => {
           <Meta title={product.name} description={product.description} />
           <Row>
             <Col md={6}>
-              <Image src={product.image} alt={product.name} fluid />
+              <Image src={product.image} alt={product.name} fluid style={{ maxHeight: '400px', objectFit: 'contain' }} />
             </Col>
             <Col md={3}>
               <ListGroup variant='flush'>
@@ -91,12 +184,13 @@ const ProductScreen = () => {
                 <ListGroup.Item>
                   <Rating
                     value={product.rating}
-                    text={`${product.numReviews} reviews`}
+                  
+                    text={`${product.numReviews} пікір`}
                   />
                 </ListGroup.Item>
-                <ListGroup.Item>Price: ${product.price}</ListGroup.Item>
+                <ListGroup.Item>Баға: ₸{product.price.toLocaleString()}</ListGroup.Item>
                 <ListGroup.Item>
-                  Description: {product.description}
+                  Сипаттама: {product.description}
                 </ListGroup.Item>
               </ListGroup>
             </Col>
@@ -105,17 +199,17 @@ const ProductScreen = () => {
                 <ListGroup variant='flush'>
                   <ListGroup.Item>
                     <Row>
-                      <Col>Price:</Col>
+                      <Col>Баға:</Col>
                       <Col>
-                        <strong>${product.price}</strong>
+                        <strong>₸{product.price.toLocaleString()}</strong>
                       </Col>
                     </Row>
                   </ListGroup.Item>
                   <ListGroup.Item>
                     <Row>
-                      <Col>Status:</Col>
+                      <Col>Күйі:</Col>
                       <Col>
-                        {product.countInStock > 0 ? 'In Stock' : 'Out Of Stock'}
+                        {product.countInStock > 0 ? 'Қоймада бар' : 'Қоймада жоқ'}
                       </Col>
                     </Row>
                   </ListGroup.Item>
@@ -124,7 +218,7 @@ const ProductScreen = () => {
                   {product.countInStock > 0 && (
                     <ListGroup.Item>
                       <Row>
-                        <Col>Qty</Col>
+                        <Col>Саны</Col>
                         <Col>
                           <Form.Control
                             as='select'
@@ -151,7 +245,7 @@ const ProductScreen = () => {
                       disabled={product.countInStock === 0}
                       onClick={addToCartHandler}
                     >
-                      Add To Cart
+                      Себетке қосу
                     </Button>
                   </ListGroup.Item>
                 </ListGroup>
@@ -160,67 +254,159 @@ const ProductScreen = () => {
           </Row>
           <Row className='review'>
             <Col md={6}>
-              <h2>Reviews</h2>
-              {product.reviews.length === 0 && <Message>No Reviews</Message>}
+              <h2 className='section-title mb-4'>Пікірлер</h2>
+              {product.reviews.length === 0 && <Message>Пікірлер жоқ</Message>}
               <ListGroup variant='flush'>
                 {product.reviews.map((review) => (
-                  <ListGroup.Item key={review._id}>
-                    <strong>{review.name}</strong>
-                    <Rating value={review.rating} />
-                    <p>{review.createdAt.substring(0, 10)}</p>
-                    <p>{review.comment}</p>
+                  <ListGroup.Item key={review._id} className='review-item'>
+                    <div className='review-header'>
+                      <strong className='reviewer-name'>{review.name}</strong>
+                      <Rating value={review.rating} />
+                    </div>
+                    <p className='review-date text-muted'>{review.createdAt.substring(0, 10)}</p>
+                    <p className='review-comment'>{review.comment}</p>
+                    
+                    {review.images && review.images.length > 0 && (
+                      <div className='review-images-gallery'>
+                        {review.images.map((imgUrl, idx) => (
+                          <div 
+                            key={idx} 
+                            className='review-thumbnail'
+                            onClick={() => openImageModal(imgUrl)}
+                          >
+                            <Image src={imgUrl} alt={`Review ${idx + 1}`} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </ListGroup.Item>
                 ))}
-                <ListGroup.Item>
-                  <h2>Write a Customer Review</h2>
+                <ListGroup.Item className='review-form-section'>
+                  <h2 className='section-title mb-3'>Пікір жазу</h2>
 
                   {loadingProductReview && <Loader />}
-
+                  {uploadingImages && (
+                    <div className='upload-loading mb-3'>
+                      <Loader />
+                      <span className='ms-2'>Суреттер жүктелуде...</span>
+                    </div>
+                  )}
                   {userInfo ? (
                     <Form onSubmit={submitHandler}>
-                      <Form.Group className='my-2' controlId='rating'>
-                        <Form.Label>Rating</Form.Label>
+                      <Form.Group className='mb-3' controlId='rating'>
+                        <Form.Label className='filter-label'>Бағалау</Form.Label>
                         <Form.Control
                           as='select'
                           required
                           value={rating}
                           onChange={(e) => setRating(e.target.value)}
+                          className='filter-select'
                         >
-                          <option value=''>Select...</option>
-                          <option value='1'>1 - Poor</option>
-                          <option value='2'>2 - Fair</option>
-                          <option value='3'>3 - Good</option>
-                          <option value='4'>4 - Very Good</option>
-                          <option value='5'>5 - Excellent</option>
+                          <option value=''>Таңдаңыз...</option>
+                          <option value='1'>1 - Нашар</option>
+                          <option value='2'>2 - Орташа</option>
+                          <option value='3'>3 - Жақсы</option>
+                          <option value='4'>4 - Өте жақсы</option>
+                          <option value='5'>5 - Тамаша</option>
                         </Form.Control>
                       </Form.Group>
-                      <Form.Group className='my-2' controlId='comment'>
-                        <Form.Label>Comment</Form.Label>
+                      
+                      <Form.Group className='mb-3' controlId='comment'>
+                        <Form.Label className='filter-label'>Пікір</Form.Label>
                         <Form.Control
                           as='textarea'
-                          row='3'
+                          rows={3}
                           required
                           value={comment}
                           onChange={(e) => setComment(e.target.value)}
-                        ></Form.Control>
+                          className='filter-input'
+                          placeholder='Өнім туралы пікіріңізді жазыңыз...'
+                        />
                       </Form.Group>
+
+                      <Form.Group className='mb-3'>
+                        <Form.Label className='filter-label'>Суреттер (ең көбі 3)</Form.Label>
+                        
+                        {reviewImages.length > 0 && (
+                          <div className='image-previews mb-3'>
+                            {reviewImages.map((img, index) => (
+                              <div key={index} className='image-preview-item'>
+                                <Image src={img.preview} alt={`Preview ${index + 1}`} />
+                                <button
+                                  type='button'
+                                  className='remove-image-btn'
+                                  onClick={() => removeImage(index)}
+                                  aria-label='Суретті жою'
+                                >
+                                  <FaTimes />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {reviewImages.length < MAX_IMAGES && (
+                          <div className='upload-btn-wrapper'>
+                            <input
+                              type='file'
+                              id='review-images'
+                              multiple
+                              accept='image/jpeg,image/png,image/webp'
+                              onChange={handleImageSelect}
+                              style={{ display: 'none' }}
+                            />
+                            <label htmlFor='review-images' className='upload-btn-apple'>
+                              <FaCamera className='me-2' />
+                              Сурет қосу
+                              <span className='upload-hint'>
+                                ({reviewImages.length}/{MAX_IMAGES}) • 5МБ дейін
+                              </span>
+                            </label>
+                          </div>
+                        )}
+                      </Form.Group>
+
                       <Button
-                        disabled={loadingProductReview}
+                        disabled={loadingProductReview || uploadingImages}
                         type='submit'
                         variant='primary'
+                        className='w-100'
                       >
-                        Submit
+                        {uploadingImages ? 'Жүктелуде...' : 'Пікір жіберу'}
                       </Button>
                     </Form>
                   ) : (
                     <Message>
-                      Please <Link to='/login'>sign in</Link> to write a review
+                      Пікір жазу үшін <Link to='/login'>кіріңіз</Link>
                     </Message>
                   )}
                 </ListGroup.Item>
               </ListGroup>
             </Col>
           </Row>
+
+          <Modal 
+            show={showImageModal} 
+            onHide={closeImageModal} 
+            centered 
+            size='lg'
+            className='image-preview-modal'
+          >
+            <Modal.Header className='border-0 pb-0'>
+              <Button 
+                variant='link' 
+                className='ms-auto text-dark' 
+                onClick={closeImageModal}
+              >
+                <FaTimes size={24} />
+              </Button>
+            </Modal.Header>
+            <Modal.Body className='text-center pt-0'>
+              {selectedImage && (
+                <Image src={selectedImage} alt='Full size' fluid className='modal-image' />
+              )}
+            </Modal.Body>
+          </Modal>
         </>
       )}
     </>
