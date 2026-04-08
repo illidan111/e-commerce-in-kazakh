@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Row, Col, Button, ButtonGroup, Form } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { useGetProductsQuery } from '../slices/productsApiSlice';
@@ -7,10 +7,14 @@ import Product from '../components/Product';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Paginate from '../components/Paginate';
-import ProductCarousel from '../components/ProductCarousel';
 import Meta from '../components/Meta';
 
-const CATEGORIES = ['Телефондар', 'Электроника', 'Киім', 'Аксессуарлар'];
+const CATEGORIES = [
+  { label: 'Телефондар', value: 'Phones' },
+  { label: 'Электроника', value: 'Electronics' },
+  { label: 'Киім', value: 'Clothing' },
+  { label: 'Аксессуарлар', value: 'Accessories' },
+];
 
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Жаңалары' },
@@ -19,16 +23,28 @@ const SORT_OPTIONS = [
   { value: 'rating', label: 'Рейтинг бойынша' },
 ];
 
+const FEATURES = [
+  { icon: '🚚', title: 'Тез жеткізу', desc: 'Қазақстан бойынша 1-3 күн ішінде жеткізу' },
+  { icon: '🔒', title: 'Қауіпсіз төлем', desc: 'SSL шифрлау арқылы қорғалған төлемдер' },
+  { icon: '⭐', title: 'Сапалы өнімдер', desc: '100% түпнұсқа кепілдігі бар өнімдер' },
+];
+
 const HomeScreen = () => {
   const { pageNumber, keyword } = useParams();
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [currentPage, setCurrentPage] = useState(Number(pageNumber) || 1);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, sortBy, minPrice, maxPrice, keyword]);
 
   const { data, isLoading, error } = useGetProductsQuery({
     keyword,
-    pageNumber,
+    pageNumber: currentPage,
     category: selectedCategory || undefined,
     minPrice: minPrice || undefined,
     maxPrice: maxPrice || undefined,
@@ -60,9 +76,7 @@ const HomeScreen = () => {
 
   return (
     <>
-      {!keyword ? (
-        <ProductCarousel />
-      ) : (
+      {keyword && (
         <Link to='/' className='btn btn-light mb-4'>
           Артқа
         </Link>
@@ -82,9 +96,26 @@ const HomeScreen = () => {
               <p className='hero-subheadline'>
                 Ең озық технологиялар мен премиум дизайнның мінсіз үйлесімі.
               </p>
-              <Button as={Link} to='/#products' variant='primary' className='px-4 py-2 fs-5 hero-cta'>
+              <Button as={Link} to='/#products' className='hero-cta'>
                 Қазір сатып алу
               </Button>
+            </div>
+          )}
+
+          {!keyword && (
+            <div className='features-section'>
+              <h2 className='features-heading'>Неге JustShop?</h2>
+              <Row className='g-4'>
+                {FEATURES.map((f, i) => (
+                  <Col key={i} md={4}>
+                    <div className='feature-card'>
+                      <div className='feature-icon'>{f.icon}</div>
+                      <h3 className='feature-title'>{f.title}</h3>
+                      <p className='feature-desc'>{f.desc}</p>
+                    </div>
+                  </Col>
+                ))}
+              </Row>
             </div>
           )}
 
@@ -99,11 +130,11 @@ const HomeScreen = () => {
                 </Button>
                 {CATEGORIES.map((cat) => (
                   <Button
-                    key={cat}
-                    className={`category-pill ${selectedCategory === cat ? 'active' : ''}`}
-                    onClick={() => handleCategoryClick(cat)}
+                    key={cat.value}
+                    className={`category-pill ${selectedCategory === cat.value ? 'active' : ''}`}
+                    onClick={() => handleCategoryClick(cat.value)}
                   >
-                    {cat}
+                    {cat.label}
                   </Button>
                 ))}
               </ButtonGroup>
@@ -154,7 +185,7 @@ const HomeScreen = () => {
           <div className='d-flex justify-content-between align-items-center mb-4 section-header'>
             <h2 className='section-title'>
               {selectedCategory && !keyword
-                ? `${selectedCategory}`
+                ? `${CATEGORIES.find((c) => c.value === selectedCategory)?.label || selectedCategory}`
                 : 'Соңғы өнімдер'}
             </h2>
             <span className='products-count'>{data?.products?.length || 0} өнім</span>
@@ -170,6 +201,7 @@ const HomeScreen = () => {
             pages={data.pages}
             page={data.page}
             keyword={keyword ? keyword : ''}
+            onPageChange={(page) => setCurrentPage(page)}
           />
         </>
       )}

@@ -25,7 +25,11 @@ const Product = ({ product }) => {
     <Card className='my-3 product-card'>
       <div className='product-image-wrapper'>
         <Link to={`/product/${product._id}`}>
-          <Card.Img src={product.image} variant='top' className='product-image' />
+          <Card.Img
+            src={product.image}
+            variant='top'
+            className='product-image'
+          />
         </Link>
         <button
           className={`favorite-btn ${isFavorite ? 'active' : ''}`}

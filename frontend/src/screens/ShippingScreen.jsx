@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Collapse, Badge } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import FormContainer from '../components/FormContainer';
 import CheckoutSteps from '../components/CheckoutSteps';
+import DeliveryMap from '../components/DeliveryMap';
 import { saveShippingAddress } from '../slices/cartSlice';
 
 const ShippingScreen = () => {
@@ -15,10 +16,33 @@ const ShippingScreen = () => {
   const [postalCode, setPostalCode] = useState(
     shippingAddress.postalCode || ''
   );
-  const [country, setCountry] = useState(shippingAddress.country || '');
+  const [country, setCountry] = useState(shippingAddress.country || 'Қазақстан');
+  
+  const [showMap, setShowMap] = useState(false);
+  const [deliveryInfo, setDeliveryInfo] = useState(null);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Handle address selection from map
+  const handleAddressSelect = (selectedData) => {
+    const { address: addrData, deliveryCost, deliveryTime, zone } = selectedData;
+    
+    // Auto-fill form fields
+    setAddress(addrData.street ? `${addrData.street} ${addrData.houseNumber}`.trim() : '');
+    setCity(addrData.city || '');
+    setCountry(addrData.country || 'Қазақстан');
+    
+    // Store delivery info
+    setDeliveryInfo({
+      cost: deliveryCost,
+      time: deliveryTime,
+      zone: zone
+    });
+    
+    // Hide map after selection
+    setShowMap(false);
+  };
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -75,9 +99,49 @@ const ShippingScreen = () => {
           ></Form.Control>
         </Form.Group>
 
-        <Button type='submit' variant='primary'>
+        <Button type='submit' variant='primary' className='w-100 mb-3'>
           Жалғастыру
         </Button>
+
+        {/* Map Toggle Button */}
+        <Button 
+          type='button'
+          variant='outline-primary'
+          className='w-100 map-toggle-btn mb-3'
+          onClick={() => setShowMap(!showMap)}
+        >
+          {showMap ? '🗺️ Картаны жасыру' : '🗺️ Картадан таңдау'}
+        </Button>
+
+        {/* Delivery Map */}
+        <Collapse in={showMap}>
+          <div>
+            <DeliveryMap onAddressSelect={handleAddressSelect} />
+          </div>
+        </Collapse>
+
+        {/* Delivery Info Display */}
+        {deliveryInfo && (
+          <div className={`delivery-info-display ${deliveryInfo.zone}-zone`}>
+            <div className="d-flex justify-content-between align-items-center">
+              <div>
+                <small className="text-muted d-block">Жеткізу құны</small>
+                <strong className="fs-5">
+                  {deliveryInfo.cost === 0 ? 'Тегін' : `${deliveryInfo.cost} ₸`}
+                </strong>
+              </div>
+              <div className="text-end">
+                <small className="text-muted d-block">Жеткізу мерзімі</small>
+                <Badge 
+                  bg={deliveryInfo.zone === 'green' ? 'success' : deliveryInfo.zone === 'yellow' ? 'warning' : 'danger'}
+                  className="mt-1"
+                >
+                  {deliveryInfo.time}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        )}
       </Form>
     </FormContainer>
   );
