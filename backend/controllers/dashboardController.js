@@ -7,9 +7,9 @@ import User from '../models/userModel.js';
 // @route   GET /api/dashboard/stats
 // @access  Private/Admin
 const getDashboardStats = asyncHandler(async (req, res) => {
-  // Total Revenue (sum of all paid orders)
+  // Total Revenue (sum of all paid orders or orders with totalPrice > 0)
   const ordersResult = await Order.aggregate([
-    { $match: { isPaid: true } },
+    { $match: { $or: [{ isPaid: true }, { totalPrice: { $gt: 0 } }] } },
     { $group: { _id: null, totalRevenue: { $sum: '$totalPrice' } } }
   ]);
   const totalRevenue = ordersResult.length > 0 ? ordersResult[0].totalRevenue : 0;
@@ -41,7 +41,7 @@ const getMonthlySales = asyncHandler(async (req, res) => {
   const monthlySales = await Order.aggregate([
     {
       $match: {
-        isPaid: true,
+        $or: [{ isPaid: true }, { totalPrice: { $gt: 0 } }],
         createdAt: { $gte: sixMonthsAgo }
       }
     },
@@ -101,7 +101,7 @@ const getRecentOrders = asyncHandler(async (req, res) => {
 const getTopProducts = asyncHandler(async (req, res) => {
   // Get all orders and aggregate product sales
   const topProducts = await Order.aggregate([
-    { $match: { isPaid: true } },
+    { $match: { $or: [{ isPaid: true }, { totalPrice: { $gt: 0 } }] } },
     { $unwind: '$orderItems' },
     {
       $group: {

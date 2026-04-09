@@ -1,5 +1,4 @@
-import { Table, Button } from 'react-bootstrap';
-import { FaTimes } from 'react-icons/fa';
+import { Table, Button, Badge } from 'react-bootstrap';
 import Message from '../../components/Message';
 import Loader from '../../components/Loader';
 import { useGetOrdersQuery } from '../../slices/ordersApiSlice';
@@ -36,20 +35,16 @@ const OrderListScreen = () => {
                 <td>{order._id}</td>
                 <td>{order.user && order.user.name}</td>
                 <td>{order.createdAt.substring(0, 10)}</td>
-                <td>${order.totalPrice}</td>
+                <td>₸{order.totalPrice}</td>
                 <td>
-                  {order.isPaid ? (
-                    order.paidAt.substring(0, 10)
-                  ) : (
-                    <FaTimes style={{ color: 'red' }} />
-                  )}
+                  <Badge bg={order.isPaid ? 'success' : 'danger'}>
+                    {order.isPaid ? 'Төленді' : 'Төленбеген'}
+                  </Badge>
                 </td>
                 <td>
-                  {order.isDelivered ? (
-                    order.deliveredAt.substring(0, 10)
-                  ) : (
-                    <FaTimes style={{ color: 'red' }} />
-                  )}
+                  <Badge bg={order.isDelivered ? 'success' : 'warning'}>
+                    {order.isDelivered ? 'Жеткізілді' : 'Жеткізілмеді'}
+                  </Badge>
                 </td>
                 <td>
                   <Button

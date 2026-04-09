@@ -1,7 +1,7 @@
 import { Row, Col, Card, Table, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaShoppingCart, FaUsers, FaBox, FaMoneyBillWave } from 'react-icons/fa';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Message from '../../components/Message';
 import Loader from '../../components/Loader';
 import {
@@ -22,6 +22,16 @@ const DashboardScreen = () => {
 
   if (isLoading) return <Loader />;
   if (error) return <Message variant='danger'>{error?.data?.message || error.error}</Message>;
+
+  // Generate placeholder data if no real sales data exists
+  const monthNames = ['Қаң', 'Ақп', 'Нау', 'Сәу', 'Мам', 'Мау', 'Шіл', 'Там', 'Қыр', 'Қаз', 'Қар', 'Жел'];
+  const currentMonth = new Date().getMonth();
+
+  const chartData = monthlySales?.length > 0 ? monthlySales : Array.from({ length: 6 }, (_, i) => ({
+    month: monthNames[(currentMonth - 5 + i + 12) % 12],
+    revenue: 0,
+    orders: 0,
+  }));
 
   const statCards = [
     {
@@ -83,34 +93,31 @@ const DashboardScreen = () => {
         <Card.Body>
           <h4 className='chart-title mb-4'>Соңғы 6 айдағы сатылым</h4>
           <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <BarChart data={monthlySales || []}>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis 
                   dataKey='month' 
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#86868b', fontSize: 12 }}
+                  tick={{ fill: '#6e6e73', fontSize: 13 }}
                 />
                 <YAxis 
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#86868b', fontSize: 12 }}
-                  tickFormatter={(value) => `₸${((value ?? 0) / 1000).toFixed(0)}K`}
+                  tick={{ fill: '#6e6e73', fontSize: 13 }}
+                  tickFormatter={(v) => `₸${(v/1000).toFixed(0)}к`}
                 />
                 <Tooltip 
-                  formatter={(value) => [`₸${(Number(value ?? 0)).toLocaleString()}`, 'Сатылым']}
+                  formatter={(value) => [`₸${Number(value).toLocaleString()}`, 'Сатылым']}
                   contentStyle={{ 
-                    background: 'white', 
+                    borderRadius: '12px', 
                     border: 'none', 
-                    borderRadius: '12px',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                   }}
                 />
+                <Legend />
                 <Bar 
                   dataKey='revenue' 
+                  name="Сатылым (₸)"
                   fill='#0071e3' 
-                  radius={[8, 8, 0, 0]}
-                  maxBarSize={60}
+                  radius={[6, 6, 0, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>
