@@ -71,6 +71,34 @@ const productSchema = mongoose.Schema(
       required: true,
       default: 0,
     },
+    // Seller marketplace fields
+    seller: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    isUserListing: {
+      type: Boolean,
+      default: false,
+    },
+    status: {
+      type: String,
+      enum: ['active', 'pending', 'sold', 'rejected'],
+      default: 'active',
+    },
+    phone: {
+      type: String,
+    },
+    city: {
+      type: String,
+    },
+    condition: {
+      type: String,
+      enum: ['Жаңа', 'Жақсы', 'Қолданылған'],
+      default: 'Жаңа',
+    },
+    images: [{
+      type: String,
+    }],
   },
   {
     timestamps: true,

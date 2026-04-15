@@ -68,6 +68,13 @@ const Header = () => {
                     <NavDropdown.Item as={Link} to='/profile'>
                       Профиль
                     </NavDropdown.Item>
+                    <NavDropdown.Item as={Link} to='/create-listing'>
+                      Жарнама жариялау
+                    </NavDropdown.Item>
+                    <NavDropdown.Item as={Link} to='/my-listings'>
+                      Менің жарнамаларым
+                    </NavDropdown.Item>
+                    <NavDropdown.Divider />
                     <NavDropdown.Item onClick={logoutHandler}>
                       Шығу
                     </NavDropdown.Item>
@@ -87,6 +94,9 @@ const Header = () => {
                   </NavDropdown.Item>
                   <NavDropdown.Item as={Link} to='/admin/reviews'>
                     Пікірлер
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to='/admin/listings'>
+                    Жарнамалар
                   </NavDropdown.Item>
                   <NavDropdown.Item as={Link} to='/admin/productlist'>
                     Өнімдер

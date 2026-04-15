@@ -1,4 +1,4 @@
-import { Card } from 'react-bootstrap';
+import { Card, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
@@ -53,6 +53,20 @@ const Product = ({ product }) => {
         />
 
         <div className='product-price'>₸{product.price.toLocaleString()}</div>
+
+        {/* Seller info for user listings */}
+        {product.isUserListing && (
+          <div className='seller-info mt-2'>
+            <Badge bg='success' className='me-2'>
+              Жеке сатушы
+            </Badge>
+            {product.city && (
+              <small className='text-muted'>
+                📍 {product.city}
+              </small>
+            )}
+          </div>
+        )}
       </Card.Body>
     </Card>
   );

@@ -11,6 +11,7 @@ import {
   Button,
   Form,
   Modal,
+  Badge,
 } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import {
@@ -250,6 +251,59 @@ const ProductScreen = () => {
                   </ListGroup.Item>
                 </ListGroup>
               </Card>
+
+              {/* Seller Info Card for User Listings */}
+              {product.isUserListing && (
+                <Card className='mt-3 seller-info-card'>
+                  <Card.Header className='bg-success text-white'>
+                    <Badge bg='light' text='success' className='me-2'>Жеке сатушы</Badge>
+                    Сатушы туралы
+                  </Card.Header>
+                  <ListGroup variant='flush'>
+                    <ListGroup.Item>
+                      <Row>
+                        <Col>Аты:</Col>
+                        <Col>
+                          <strong>{product.seller?.name || 'Жеке сатушы'}</strong>
+                        </Col>
+                      </Row>
+                    </ListGroup.Item>
+                    <ListGroup.Item>
+                      <Row>
+                        <Col>Қала:</Col>
+                        <Col>
+                          <strong>{product.city}</strong>
+                        </Col>
+                      </Row>
+                    </ListGroup.Item>
+                    <ListGroup.Item>
+                      <Row>
+                        <Col>Жағдайы:</Col>
+                        <Col>
+                          <strong>{product.condition}</strong>
+                        </Col>
+                      </Row>
+                    </ListGroup.Item>
+                    <ListGroup.Item>
+                      <Row>
+                        <Col>Телефон:</Col>
+                        <Col>
+                          <strong>{product.phone}</strong>
+                        </Col>
+                      </Row>
+                    </ListGroup.Item>
+                    <ListGroup.Item>
+                      <Button
+                        variant='success'
+                        className='btn-block w-100'
+                        href={`tel:${product.phone}`}
+                      >
+                        📞 Хабарласу
+                      </Button>
+                    </ListGroup.Item>
+                  </ListGroup>
+                </Card>
+              )}
             </Col>
           </Row>
           <Row className='review'>

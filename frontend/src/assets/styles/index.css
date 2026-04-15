@@ -1747,6 +1747,334 @@ main .container {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
+/* Seller Marketplace Styles */
+
+/* Hero Buttons */
+.hero-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.hero-cta-secondary {
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+  padding: 14px 32px;
+  border-radius: 980px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.hero-cta-secondary:hover {
+  background: white;
+  color: #1d1d1f;
+}
+
+/* Create Listing Screen */
+.create-listing-screen {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.listing-form-card {
+  background: white;
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.apple-input {
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  padding: 12px 16px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.apple-input:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+}
+
+.condition-radio-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.condition-badge {
+  cursor: pointer;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.condition-badge.active {
+  background: #0071e3 !important;
+}
+
+/* Image Upload Area */
+.image-upload-area {
+  position: relative;
+  border: 2px dashed #d1d1d6;
+  border-radius: 16px;
+  padding: 24px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f7;
+  transition: all 0.2s ease;
+}
+
+.image-upload-area:hover {
+  border-color: #0071e3;
+  background: #f0f7ff;
+}
+
+.upload-placeholder {
+  text-align: center;
+}
+
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.upload-text {
+  font-size: 15px;
+  color: #1d1d1f;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.upload-hint {
+  font-size: 13px;
+  color: #86868b;
+}
+
+.file-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.image-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.preview-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+}
+
+.preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-item .remove-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.preview-item .remove-btn:hover {
+  background: #ff3b30;
+  color: white;
+}
+
+.preview-item .main-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: #0071e3;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.upload-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  color: #0071e3;
+  font-size: 14px;
+}
+
+/* Apple Buttons */
+.apple-btn-primary {
+  background: #0071e3;
+  border: none;
+  border-radius: 980px;
+  padding: 12px 24px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.apple-btn-primary:hover {
+  background: #0077ed;
+  transform: translateY(-1px);
+}
+
+.apple-btn-secondary {
+  background: #f5f5f7;
+  border: none;
+  color: #1d1d1f;
+  border-radius: 980px;
+  padding: 12px 24px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.apple-btn-secondary:hover {
+  background: #e8e8ed;
+}
+
+/* My Listings Screen */
+.my-listings-screen {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.listing-card {
+  background: white;
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.listing-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.listing-image-wrapper {
+  position: relative;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+}
+
+.listing-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.status-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.type-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.listing-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d1d1f;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.listing-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0071e3;
+  margin-bottom: 4px;
+}
+
+.listing-location,
+.listing-condition {
+  font-size: 13px;
+  color: #6e6e73;
+  margin-bottom: 4px;
+}
+
+/* Seller Info on Product Card */
+.seller-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Seller Info Card on Product Screen */
+.seller-info-card {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.seller-info-card .card-header {
+  font-weight: 600;
+  padding: 16px;
+}
+
+.seller-info-card .list-group-item {
+  padding: 12px 16px;
+}
+
+/* Listing Moderation Screen */
+.listing-moderation-screen {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
 .zone-legend {
   background: #f8f9fa;
   padding: 12px 16px;

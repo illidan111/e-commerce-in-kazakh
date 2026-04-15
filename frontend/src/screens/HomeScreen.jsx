@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Row, Col, Button, ButtonGroup, Form } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useGetProductsQuery } from '../slices/productsApiSlice';
 import { Link } from 'react-router-dom';
 import Product from '../components/Product';
@@ -31,6 +32,7 @@ const FEATURES = [
 
 const HomeScreen = () => {
   const { pageNumber, keyword } = useParams();
+  const { userInfo } = useSelector((state) => state.auth);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [minPrice, setMinPrice] = useState('');
@@ -96,9 +98,21 @@ const HomeScreen = () => {
               <p className='hero-subheadline'>
                 Ең озық технологиялар мен премиум дизайнның мінсіз үйлесімі.
               </p>
-              <Button as={Link} to='/#products' className='hero-cta'>
-                Қазір сатып алу
-              </Button>
+              <div className='hero-buttons'>
+                <Button as={Link} to='/#products' className='hero-cta'>
+                  Қазір сатып алу
+                </Button>
+                {userInfo && (
+                  <Button
+                    as={Link}
+                    to='/create-listing'
+                    variant='outline-light'
+                    className='hero-cta-secondary'
+                  >
+                    Жарнама жариялау
+                  </Button>
+                )}
+              </div>
             </div>
           )}
 

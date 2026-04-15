@@ -54,6 +54,19 @@ function fileFilter(req, file, cb) {
 // 5MB file size limit
 const maxFileSize = 5 * 1024 * 1024;
 
+// Seller listing images storage
+const listingStorage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, 'uploads/listings/');
+  },
+  filename(req, file, cb) {
+    cb(
+      null,
+      `listing-${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`
+    );
+  },
+});
+
 const uploadSingle = multer({
   storage: singleStorage,
   fileFilter,
@@ -66,8 +79,15 @@ const uploadMultiple = multer({
   limits: { fileSize: maxFileSize }
 });
 
+const uploadListing = multer({
+  storage: listingStorage,
+  fileFilter,
+  limits: { fileSize: maxFileSize }
+});
+
 const uploadSingleImage = uploadSingle.single('image');
 const uploadReviewImages = uploadMultiple.array('images', 3);
+const uploadListingImages = uploadListing.array('images', 5);
 
 // Single image upload endpoint (existing)
 router.post('/', (req, res) => {
@@ -104,6 +124,32 @@ router.post('/reviews', (req, res) => {
     }
 
     const images = req.files.map(file => `/images/reviews/${file.filename}`);
+
+    res.status(200).send({
+      message: 'Суреттер сәтті жүктелді',
+      images: images,
+    });
+  });
+});
+
+// Multiple images upload endpoint for seller listings (up to 5 images)
+router.post('/listings', (req, res) => {
+  uploadListingImages(req, res, function (err) {
+    if (err) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).send({ message: 'Әр файл өлшемі 5МБ-ден аспауы керек' });
+      }
+      if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+        return res.status(400).send({ message: 'Ең көбі 5 сурет жүктеуге болады' });
+      }
+      return res.status(400).send({ message: err.message });
+    }
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).send({ message: 'Суреттер жүктелмеді' });
+    }
+
+    const images = req.files.map(file => `/uploads/listings/${file.filename}`);
 
     res.status(200).send({
       message: 'Суреттер сәтті жүктелді',
